@@ -1,11 +1,10 @@
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.List;
 
 public class CoronaCalculator {
     static int days;
-    static double tote;
-    static int anzahloesterreicher  = 8000000;
+    static double deaths;
+    static int population = 327000000;
     static double prozent;
     static FileWriter myWriter;
 
@@ -14,7 +13,7 @@ public class CoronaCalculator {
         myWriter = new FileWriter("corona.csv");
 try {
     myWriter.write("Infizierte;Tote" + "\n");
-    double x = 150;
+    double x = 20000;
     x = calculate(x);
     calculateDecrease(x);
     myWriter.close();
@@ -27,14 +26,14 @@ try {
 
     private static double calculate(double x) throws IOException {
 
-        if (x < 5300000) {
+        if (x < population * 0.66) {
             x = x * 1.3;
             days++;
-            prozent = (x / anzahloesterreicher) * 100;
-            tote = x * 0.007;
-            System.out.println("In " + days + " Tagen sind " + (int) x + " Personen infiziert (" + (int) prozent + "%). "+ (int) tote + " sind tot.");
+            prozent = (x / population) * 100;
+            deaths = x * 0.007;
+            System.out.println("In " + days + " Tagen sind " + (int) x + " Personen infiziert (" + (int) prozent + "%). "+ (int) deaths + " sind tot.");
 
-            myWriter.write((int) x + ";" + (int) tote + "\n");
+            myWriter.write((int) x + ";" + (int) deaths + "\n");
 
             return calculate(x);
         } else {
@@ -48,11 +47,11 @@ try {
         if (x > 10) {
             x = (x * 0.7);
             days++;
-            prozent = (x / anzahloesterreicher) * 100;
-            tote = tote + x * 0.007;
-            System.out.println("In " + days + " Tagen sind " + (int) x + " Personen infiziert (" + (int) prozent + "%). " + (int) tote + " sind tot.");
+            prozent = (x / population) * 100;
+            deaths = deaths + x * 0.007;
+            System.out.println("In " + days + " Tagen sind " + (int) x + " Personen infiziert (" + (int) prozent + "%). " + (int) deaths + " sind tot.");
 
-            myWriter.write((int) x + ";" + (int) tote + "\n");
+            myWriter.write((int) x + ";" + (int) deaths + "\n");
 
             return calculateDecrease(x);
 
