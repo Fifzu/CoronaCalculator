@@ -27,11 +27,12 @@ public class DataReader {
             {
                 try (BufferedReader br = new BufferedReader(new FileReader(file))) {
                     int infected = 0;
+                    int deaths = 0;
                     String line = "";
                     while (true) {
                         try {
                             if (!((line = br.readLine()) != null)){
-                                records.add(file.getName().replaceFirst("[.][^.]+$", "") + ";"+infected);
+                                records.add(file.getName().replaceFirst("[.][^.]+$", "") + ";"+infected+";"+deaths);
                                 break;
                             }
                         } catch (IOException e) {
@@ -41,7 +42,9 @@ public class DataReader {
 
                         if (values[1].equals(country) && values.length>3) {
                             infected += Integer.parseInt(values[3]);
-
+                            if (values.length>4 && !values[4].equals("")) {
+                                deaths += Integer.parseInt(values[4]);
+                            }
                         }
                     }
                 } catch (FileNotFoundException e) {
@@ -58,7 +61,7 @@ public class DataReader {
 
         try {
             fileWriter = new FileWriter(country + ".csv");
-            fileWriter.write("Datum;Infizierte" + "\n");
+            fileWriter.write("Datum;Infizierte;Tote" + "\n");
             for (int i=0;i<records.size();i++) {
                 System.out.println(records.get(i));
                 fileWriter.write(records.get(i)+"\n");

@@ -11,7 +11,7 @@ public class CoronaCalculator {
 
     public static void main(String[] args) throws IOException {
 
-        dataReader = new DataReader("South Korea");
+        dataReader = new DataReader("US");
 
 
 //        fileWriter = new FileWriter("corona.csv");
