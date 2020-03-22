@@ -15,19 +15,19 @@ public class CoronaCalculator {
         dataReader = new DataReader(country);
 
 
-//        fileWriter = new FileWriter("corona.csv");
-//
-//        try {
-//            fileWriter.write("Infizierte;Tote" + "\n");
-//            double x = 287300;
-//            x = calculate(x);
-//            calculateDecrease(x);
-//            fileWriter.close();
-//
-//        } catch (IOException e) {
-//            System.out.println("An error occurred.");
-//            e.printStackTrace();
-//        }
+        fileWriter = new FileWriter("corona.csv");
+
+        try {
+            fileWriter.write("Infizierte;Tote" + "\n");
+            double x = 287300;
+            x = calculate(x);
+            calculateDecrease(x);
+            fileWriter.close();
+
+        } catch (IOException e) {
+            System.out.println("An error occurred.");
+            e.printStackTrace();
+        }
     }
 
     private static double calculate(double x) throws IOException {

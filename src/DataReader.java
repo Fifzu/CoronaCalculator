@@ -41,7 +41,7 @@ public class DataReader {
                         String[] values = line.split(",");
 
                         for (String country : countries) {
-                            if (values[1].equals(country) && values.length > 3) {
+                            if (values[1].equals(country) || values [0].equals((country)) && values.length > 3) {
                                 infected += Integer.parseInt(values[3]);
                                 if (values.length > 4 && !values[4].equals("")) {
                                     deaths += Integer.parseInt(values[4]);
