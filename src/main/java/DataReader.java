@@ -1,3 +1,13 @@
+import org.eclipse.jgit.api.Git;
+import org.eclipse.jgit.api.MergeResult;
+import org.eclipse.jgit.api.PullResult;
+import org.eclipse.jgit.api.errors.GitAPIException;
+import org.eclipse.jgit.api.errors.InvalidRemoteException;
+import org.eclipse.jgit.api.errors.TransportException;
+import org.eclipse.jgit.internal.storage.file.FileRepository;
+import org.eclipse.jgit.lib.Repository;
+import org.eclipse.jgit.transport.FetchResult;
+
 import java.io.*;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -5,16 +15,48 @@ import java.util.List;
 
 public class DataReader {
 
+    static String REPODIRECTORY = "../COVID-19";
     private static FileWriter fileWriter;
     private List<String> records;
     private int lastInfected;
     private String lastDate;
+    private File repoDir;
 
     public DataReader(String[] countries) {
+        repoDir = new File(REPODIRECTORY);
+        cloneRepo();
         this.records = calculateRecords(countries);
         this.lastInfected = calculatelastInfected();
         this.lastDate = calculatelastDate();
   //      printData(data,country);
+    }
+
+   private void cloneRepo() {
+       try {
+           if (repoDir.exists()) {
+               Repository repository = new FileRepository(repoDir.getAbsolutePath() + "/.git");
+               Git git = new Git(repository);
+
+               PullResult result = git.pull().call();
+               FetchResult fetchResult = result.getFetchResult();
+               MergeResult mergeResult = result.getMergeResult();
+               mergeResult.getMergeStatus();  // this should be interesting
+               System.out.println(mergeResult.toString());
+           } else {
+               Git git = Git.cloneRepository()
+                       .setURI( "https://github.com/CSSEGISandData/COVID-19.git" )
+                       .setDirectory(repoDir)
+                       .call();
+           }
+       } catch (IOException e) {
+       e.printStackTrace();
+       } catch (InvalidRemoteException e) {
+           e.printStackTrace();
+       } catch (TransportException e) {
+           e.printStackTrace();
+       } catch (GitAPIException e) {
+           e.printStackTrace();
+       }
     }
 
     private int calculatelastInfected () {
@@ -82,6 +124,7 @@ public class DataReader {
     public int getLastInfected () {
         return this.lastInfected;
     }
+
     public String getLastDate () {
         return this.lastDate;
     }

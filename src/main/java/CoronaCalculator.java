@@ -1,3 +1,4 @@
+import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.text.ParseException;
@@ -19,7 +20,6 @@ public class CoronaCalculator {
     static String currentDate;
 
     public static void main(String[] args) throws IOException {
-
         dataReader = new DataReader(COUNTRIES);
         double x = dataReader.getLastInfected();
         records = dataReader.getRecords();
@@ -41,7 +41,6 @@ public class CoronaCalculator {
 
             System.out.println("In " + days + " Tagen sind " + (int) x + " Personen infiziert (" + (int) percent + "%). "+ (int) deaths + " sind tot.");
             records.add(dt+ ";"+(int) x + ";"+ (int) deaths);
-       //     fileWriter.write((int) x + ";" + (int) deaths + "\n");
 
             return calculate(x);
         } else {
