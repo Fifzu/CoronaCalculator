@@ -1,3 +1,5 @@
+package com.fifzu.coronacalculator;
+
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.MergeResult;
 import org.eclipse.jgit.api.PullResult;
@@ -16,7 +18,6 @@ import java.util.List;
 public class DataReader {
 
     static String REPODIRECTORY = "../COVID-19";
-    private static FileWriter fileWriter;
     private List<String> records;
     private int lastInfected;
     private String lastDate;
