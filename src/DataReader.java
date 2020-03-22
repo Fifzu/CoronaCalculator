@@ -1,29 +1,35 @@
 import java.io.*;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 public class DataReader {
 
-    static FileWriter fileWriter;
+    private static FileWriter fileWriter;
+    private List<String> records;
+    private int lastInfected;
+    private String lastDate;
 
-    public int calculateX (String[] countries) {
-        List<String> data;
-        data = getData(countries);
-        printData(data,countries);
-        String lastSet = data.get(data.size()-1);
+    public DataReader(String[] countries) {
+        this.records = calculateRecords(countries);
+        this.lastInfected = calculatelastInfected();
+        this.lastDate = calculatelastDate();
+  //      printData(data,country);
+    }
+
+    private int calculatelastInfected () {
+        String lastSet = records.get(records.size()-1);
         int x = Integer.parseInt(lastSet.split(";")[1]);
         return x;
     }
+    private String calculatelastDate () {
+        String lastSet = records.get(records.size()-1);
+        String lastDate = lastSet.split(";")[0];
+        return lastDate;
+    }
 
-
-
-
-
-    private List<String> getData (String[] countries) {
-        List<String> records = new ArrayList<>();
+    private List<String> calculateRecords(String[] countries) {
+        List<String> readInRecords = new ArrayList<>();
         File[] fileList = new File("../COVID-19/csse_covid_19_data/csse_covid_19_daily_reports").listFiles();
         Arrays.sort(fileList);
 
@@ -38,7 +44,7 @@ public class DataReader {
                     while (true) {
                         try {
                             if (!((line = br.readLine()) != null)){
-                                records.add(file.getName().replaceFirst("[.][^.]+$", "") + ";"+infected+";"+deaths);
+                                //readInRecords.add(file.getName().replaceFirst("[.][^.]+$", "") + ";"+infected+";"+deaths);
                                 break;
                             }
                         } catch (IOException e) {
@@ -48,9 +54,13 @@ public class DataReader {
 
                         for (String country : countries) {
                             if (values[1].equals(country) && values.length > 3) {
-                                infected += Integer.parseInt(values[3]);
-                                if (values.length > 4 && !values[4].equals("")) {
-                                    deaths += Integer.parseInt(values[4]);
+                                int newInfected = Integer.parseInt(values[3]);
+                                if (newInfected>0) {
+                                    infected += newInfected;
+                                    if (values.length > 4 && !values[4].equals("")) {
+                                        deaths += Integer.parseInt(values[4]);
+                                    }
+                                    readInRecords.add(file.getName().replaceFirst("[.][^.]+$", "") + ";"+infected+";"+deaths);
                                 }
                             }
                         }
@@ -62,23 +72,17 @@ public class DataReader {
                 }
             }
         }
-        return records;
+        return readInRecords;
     }
 
-    private void printData (List<String> records, String[] countries)  {
+    public List<String> getRecords() {
+        return this.records;
+    }
 
-        try {
-            fileWriter = new FileWriter(countries[0] + ".csv");
-            fileWriter.write("Datum;Infizierte;Tote" + "\n");
-            for (int i=0;i<records.size();i++) {
-                System.out.println(records.get(i));
-                fileWriter.write(records.get(i)+"\n");
-            }
-            fileWriter.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-
+    public int getLastInfected () {
+        return this.lastInfected;
+    }
+    public String getLastDate () {
+        return this.lastDate;
     }
 }
