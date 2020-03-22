@@ -11,8 +11,11 @@ import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.transport.FetchResult;
 
 import java.io.*;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 
 public class DataReader {
@@ -77,17 +80,18 @@ public class DataReader {
         Arrays.sort(fileList);
 
         for (File file : fileList) {
-            String filecheck = file.getName().substring(file.getName().length()-4);
-            if (filecheck.contains(".csv"))
-            {
+            String filecheck = file.getName().substring(file.getName().length() - 4);
+            if (filecheck.contains(".csv")) {
                 try (BufferedReader br = new BufferedReader(new FileReader(file))) {
                     int infected = 0;
                     int deaths = 0;
                     String line = "";
                     while (true) {
                         try {
-                            if (!((line = br.readLine()) != null)){
-                                //readInRecords.add(file.getName().replaceFirst("[.][^.]+$", "") + ";"+infected+";"+deaths);
+                            if (!((line = br.readLine()) != null)) {
+                                if (infected > 0 || deaths > 0) {
+                                    readInRecords.add(file.getName().replaceFirst("[.][^.]+$", "") + ";" + infected + ";" + deaths);
+                                }
                                 break;
                             }
                         } catch (IOException e) {
@@ -98,12 +102,9 @@ public class DataReader {
                         for (String country : countries) {
                             if (values[1].equals(country) && values.length > 3) {
                                 int newInfected = Integer.parseInt(values[3]);
-                                if (newInfected>0) {
-                                    infected += newInfected;
-                                    if (values.length > 4 && !values[4].equals("")) {
-                                        deaths += Integer.parseInt(values[4]);
-                                    }
-                                    readInRecords.add(file.getName().replaceFirst("[.][^.]+$", "") + ";"+infected+";"+deaths);
+                                infected += newInfected;
+                                if (values.length > 4 && !values[4].equals("")) {
+                                    deaths += Integer.parseInt(values[4]);
                                 }
                             }
                         }
@@ -115,6 +116,7 @@ public class DataReader {
                 }
             }
         }
+
         return readInRecords;
     }
 

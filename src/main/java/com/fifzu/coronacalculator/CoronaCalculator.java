@@ -1,5 +1,6 @@
 package com.fifzu.coronacalculator;
 
+import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.text.ParseException;
@@ -35,7 +36,7 @@ public class CoronaCalculator extends JFrame implements ActionListener {
     static String currentDate;
 
     static private JLabel jlCountries = new JLabel("Enter countries (seperated by ;):");
-    static private JLabel jlPopulation = new JLabel("Enter population: ");
+    static private JLabel jlPopulation = new JLabel("Enter population (in Mio): ");
     static private JTextField jtCountries = new JTextField(20);
     static private JTextField jtPopulation = new JTextField(20);
     static private JButton jbRun = new JButton("Run");
@@ -70,7 +71,7 @@ public class CoronaCalculator extends JFrame implements ActionListener {
         constraints.anchor = GridBagConstraints.CENTER;
 
         jtCountries.setText("Austria");
-        jtPopulation.setText("8000000");
+        jtPopulation.setText("8");
 
         jbRun.addActionListener(this);
 
@@ -85,26 +86,25 @@ public class CoronaCalculator extends JFrame implements ActionListener {
         setLocationRelativeTo(null);
     }
 
-    public static void main(String[] args) throws IOException {
-
+    public static void main(String[] args) {
         try {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
-
         SwingUtilities.invokeLater(new Runnable() {
             @Override
             public void run() {
                 new CoronaCalculator().setVisible(true);
             }
         });
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(null,"An error occured!","Corona Calculator", JOptionPane.ERROR_MESSAGE);
+            ex.printStackTrace();
+        }
     }
 
     private static void startCalculation() {
-
+        days=0;
         countries = jtCountries.getText().split(";");
-        population = Integer.parseInt(jtPopulation.getText());
+        population = Integer.parseInt(jtPopulation.getText()+"000000");
 
         dataReader = new DataReader(countries);
         double x = dataReader.getLastInfected();
@@ -159,13 +159,17 @@ public class CoronaCalculator extends JFrame implements ActionListener {
 
     private static void printData ()  {
         try {
-            FileWriter fileWriter = new FileWriter(countries[0] + ".csv");
+            File file = new File(System.getProperty("user.dir") + "\\datasheets");
+            file.mkdir();
+            file = new File(file + "\\" + countries[0] + ".csv");
+            FileWriter fileWriter = new FileWriter(file);
             fileWriter.write("Datum;Infizierte;Tote" + "\n");
             for (int i=0;i<records.size();i++) {
                 System.out.println(records.get(i));
                 fileWriter.write(records.get(i)+"\n");
             }
             fileWriter.close();
+            Runtime.getRuntime().exec("explorer.exe /select," +file);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -174,7 +178,7 @@ public class CoronaCalculator extends JFrame implements ActionListener {
     public void actionPerformed (ActionEvent ae){
         if(ae.getSource() == this.jbRun){
             startCalculation();
-            JOptionPane.showMessageDialog(null,"Finished Calculation","Corona Calculator", JOptionPane.INFORMATION_MESSAGE);
+    //        JOptionPane.showMessageDialog(null,"Finished Calculation","Corona Calculator", JOptionPane.INFORMATION_MESSAGE);
         }
     }
 
