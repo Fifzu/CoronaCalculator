@@ -8,15 +8,15 @@ import java.util.List;
 public class DataReader {
 
     static FileWriter fileWriter;
-    public DataReader(String country) {
+    public DataReader(String[] countries) {
         List<String> data;
 
-        data = getData(country);
+        data = getData(countries);
 
-        printData(data,country);
+        printData(data,countries);
     }
 
-    private List<String> getData (String country) {
+    private List<String> getData (String[] countries) {
         List<String> records = new ArrayList<>();
         File[] fileList = new File("../COVID-19/csse_covid_19_data/csse_covid_19_daily_reports").listFiles();
         Arrays.sort(fileList);
@@ -40,10 +40,12 @@ public class DataReader {
                         }
                         String[] values = line.split(",");
 
-                        if (values[1].equals(country) && values.length>3) {
-                            infected += Integer.parseInt(values[3]);
-                            if (values.length>4 && !values[4].equals("")) {
-                                deaths += Integer.parseInt(values[4]);
+                        for (String country : countries) {
+                            if (values[1].equals(country) && values.length > 3) {
+                                infected += Integer.parseInt(values[3]);
+                                if (values.length > 4 && !values[4].equals("")) {
+                                    deaths += Integer.parseInt(values[4]);
+                                }
                             }
                         }
                     }
@@ -57,10 +59,10 @@ public class DataReader {
         return records;
     }
 
-    private void printData (List<String> records,String country)  {
+    private void printData (List<String> records, String[] countries)  {
 
         try {
-            fileWriter = new FileWriter(country + ".csv");
+            fileWriter = new FileWriter(countries[0] + ".csv");
             fileWriter.write("Datum;Infizierte;Tote" + "\n");
             for (int i=0;i<records.size();i++) {
                 System.out.println(records.get(i));
