@@ -8,13 +8,19 @@ import java.util.List;
 public class DataReader {
 
     static FileWriter fileWriter;
-    public DataReader(String[] countries) {
+
+    public int calculateX (String[] countries) {
         List<String> data;
-
         data = getData(countries);
-
         printData(data,countries);
+        String lastSet = data.get(data.size()-1);
+        int x = Integer.parseInt(lastSet.split(";")[1]);
+        return x;
     }
+
+
+
+
 
     private List<String> getData (String[] countries) {
         List<String> records = new ArrayList<>();

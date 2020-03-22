@@ -12,14 +12,14 @@ public class CoronaCalculator {
     public static void main(String[] args) throws IOException {
 
         String[] country = {"South Korea", "Korea, South", "Republic of Korea"};
-        dataReader = new DataReader(country);
-
+        dataReader = new DataReader();
+        double x = dataReader.calculateX(country);
 
         fileWriter = new FileWriter("corona.csv");
 
         try {
             fileWriter.write("Infizierte;Tote" + "\n");
-            double x = 287300;
+
             x = calculate(x);
             calculateDecrease(x);
             fileWriter.close();
