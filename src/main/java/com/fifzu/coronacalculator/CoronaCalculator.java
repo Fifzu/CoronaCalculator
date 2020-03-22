@@ -95,32 +95,33 @@ public class CoronaCalculator extends JFrame implements ActionListener {
                 new CoronaCalculator().setVisible(true);
             }
         });
-        } catch (Exception ex) {
-            JOptionPane.showMessageDialog(null,"An error occured!","Corona Calculator", JOptionPane.ERROR_MESSAGE);
-            ex.printStackTrace();
-        }
-    }
-
-    private static void startCalculation() {
-        days=0;
-        countries = jtCountries.getText().split(";");
-        population = Integer.parseInt(jtPopulation.getText()+"000000");
-
-        dataReader = new DataReader(countries);
-        double x = dataReader.getLastInfected();
-        records = dataReader.getRecords();
-        currentDate = dataReader.getLastDate();
-
-        try {
-            x = calculate(x);
-            calculateDecrease(x);
-            printData();
-        } catch (IOException e) {
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(null,e.toString(),"An error occurred!", JOptionPane.ERROR_MESSAGE);
             e.printStackTrace();
         }
     }
 
-    private static double calculate(double x) throws IOException {
+    private static void startCalculation() {
+        try {
+            days = 0;
+            countries = jtCountries.getText().split(";");
+            population = Integer.parseInt(jtPopulation.getText() + "000000");
+
+            dataReader = new DataReader(countries);
+            double x = dataReader.getLastInfected();
+            records = dataReader.getRecords();
+            currentDate = dataReader.getLastDate();
+
+            x = calculate(x);
+            calculateDecrease(x);
+            printData();
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(null,e.toString(),"An error occurred!", JOptionPane.ERROR_MESSAGE);
+            e.printStackTrace();
+        }
+    }
+
+    private static double calculate(double x) throws Exception {
 
         if (x < population * 0.66) {
             x = x * 1.3;
@@ -139,7 +140,7 @@ public class CoronaCalculator extends JFrame implements ActionListener {
         return x;
     }
 
-    private static double calculateDecrease( double x) throws IOException {
+    private static double calculateDecrease( double x) throws Exception {
         if (x > 1) {
             x = (x * 0.7);
             days++;
@@ -157,8 +158,8 @@ public class CoronaCalculator extends JFrame implements ActionListener {
         return x;
     }
 
-    private static void printData ()  {
-        try {
+    private static void printData () throws Exception {
+
             File file = new File(System.getProperty("user.dir") + "\\datasheets");
             file.mkdir();
             file = new File(file + "\\" + countries[0] + ".csv");
@@ -170,9 +171,7 @@ public class CoronaCalculator extends JFrame implements ActionListener {
             }
             fileWriter.close();
             Runtime.getRuntime().exec("explorer.exe /select," +file);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+
     }
 
     public void actionPerformed (ActionEvent ae){
@@ -182,14 +181,10 @@ public class CoronaCalculator extends JFrame implements ActionListener {
         }
     }
 
-    private static String getDate() {
+    private static String getDate() throws Exception {
         String dt  = currentDate;
         Calendar c = Calendar.getInstance();
-        try {
-            c.setTime(sdf.parse(dt));
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
+        c.setTime(sdf.parse(dt));
         c.add(Calendar.DATE, days);  // number of days to add
         dt = sdf.format(c.getTime());
         return  dt;

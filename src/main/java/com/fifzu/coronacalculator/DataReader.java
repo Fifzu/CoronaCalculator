@@ -26,7 +26,7 @@ public class DataReader {
     private String lastDate;
     private File repoDir;
 
-    public DataReader(String[] countries) {
+    public DataReader(String[] countries) throws Exception {
         repoDir = new File(REPODIRECTORY);
         cloneRepo();
         this.records = calculateRecords(countries);
@@ -35,31 +35,21 @@ public class DataReader {
   //      printData(data,country);
     }
 
-   private void cloneRepo() {
-       try {
-           if (repoDir.exists()) {
-               Repository repository = new FileRepository(repoDir.getAbsolutePath() + "/.git");
-               Git git = new Git(repository);
+   private void cloneRepo() throws Exception {
+       if (repoDir.exists()) {
+           Repository repository = new FileRepository(repoDir.getAbsolutePath() + "/.git");
+           Git git = new Git(repository);
 
-               PullResult result = git.pull().call();
-               FetchResult fetchResult = result.getFetchResult();
-               MergeResult mergeResult = result.getMergeResult();
-               mergeResult.getMergeStatus();  // this should be interesting
-               System.out.println(mergeResult.toString());
-           } else {
-               Git git = Git.cloneRepository()
-                       .setURI( "https://github.com/CSSEGISandData/COVID-19.git" )
-                       .setDirectory(repoDir)
-                       .call();
-           }
-       } catch (IOException e) {
-       e.printStackTrace();
-       } catch (InvalidRemoteException e) {
-           e.printStackTrace();
-       } catch (TransportException e) {
-           e.printStackTrace();
-       } catch (GitAPIException e) {
-           e.printStackTrace();
+           PullResult result = git.pull().call();
+           FetchResult fetchResult = result.getFetchResult();
+           MergeResult mergeResult = result.getMergeResult();
+           mergeResult.getMergeStatus();  // this should be interesting
+           System.out.println(mergeResult.toString());
+       } else {
+           Git git = Git.cloneRepository()
+                   .setURI( "https://github.com/CSSEGISandData/COVID-19.git" )
+                   .setDirectory(repoDir)
+                   .call();
        }
     }
 
@@ -74,7 +64,7 @@ public class DataReader {
         return lastDate;
     }
 
-    private List<String> calculateRecords(String[] countries) {
+    private List<String> calculateRecords(String[] countries) throws Exception {
         List<String> readInRecords = new ArrayList<>();
         File[] fileList = new File("../COVID-19/csse_covid_19_data/csse_covid_19_daily_reports").listFiles();
         Arrays.sort(fileList);
@@ -87,16 +77,13 @@ public class DataReader {
                     int deaths = 0;
                     String line = "";
                     while (true) {
-                        try {
-                            if (!((line = br.readLine()) != null)) {
-                                if (infected > 0 || deaths > 0) {
-                                    readInRecords.add(file.getName().replaceFirst("[.][^.]+$", "") + ";" + infected + ";" + deaths);
-                                }
-                                break;
+                        if (!((line = br.readLine()) != null)) {
+                            if (infected > 0 || deaths > 0) {
+                                readInRecords.add(file.getName().replaceFirst("[.][^.]+$", "") + ";" + infected + ";" + deaths);
                             }
-                        } catch (IOException e) {
-                            e.printStackTrace();
+                            break;
                         }
+
                         String[] values = line.split(",");
 
                         for (String country : countries) {
@@ -109,10 +96,6 @@ public class DataReader {
                             }
                         }
                     }
-                } catch (FileNotFoundException e) {
-                    e.printStackTrace();
-                } catch (IOException e) {
-                    e.printStackTrace();
                 }
             }
         }
