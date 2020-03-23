@@ -30,9 +30,10 @@ public class DataReader {
         repoDir = new File(REPODIRECTORY);
         cloneRepo();
         this.records = calculateRecords(countries);
-        this.lastInfected = calculatelastInfected();
-        this.lastDate = calculatelastDate();
-  //      printData(data,country);
+        if (records.size()>0){
+            this.lastInfected = calculatelastInfected();
+            this.lastDate = calculatelastDate();
+        }
     }
 
    private void cloneRepo() throws Exception {
@@ -99,7 +100,6 @@ public class DataReader {
                 }
             }
         }
-
         return readInRecords;
     }
 

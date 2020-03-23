@@ -2,8 +2,6 @@ package com.fifzu.coronacalculator;
 
 import java.io.File;
 import java.io.FileWriter;
-import java.io.IOException;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.List;
@@ -46,8 +44,8 @@ public class CoronaCalculator extends JFrame implements ActionListener {
         super("Corona Calculator");
 
         JPanel newPanel = new JPanel(new GridBagLayout());
-
         GridBagConstraints constraints = new GridBagConstraints();
+
         constraints.anchor = GridBagConstraints.WEST;
         constraints.insets = new Insets(10, 10, 10, 10);
 
@@ -72,14 +70,10 @@ public class CoronaCalculator extends JFrame implements ActionListener {
 
         jtCountries.setText("Austria");
         jtPopulation.setText("8");
-
         jbRun.addActionListener(this);
 
         newPanel.add(jbRun, constraints);
-
-        newPanel.setBorder(BorderFactory.createTitledBorder(
-                BorderFactory.createEtchedBorder(), "Parameters"));
-
+        newPanel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), "Parameters"));
         add(newPanel);
 
         pack();
@@ -89,15 +83,14 @@ public class CoronaCalculator extends JFrame implements ActionListener {
     public static void main(String[] args) {
         try {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-        SwingUtilities.invokeLater(new Runnable() {
+            SwingUtilities.invokeLater(new Runnable() {
             @Override
             public void run() {
                 new CoronaCalculator().setVisible(true);
             }
         });
         } catch (Exception e) {
-            JOptionPane.showMessageDialog(null,e.toString(),"An error occurred!", JOptionPane.ERROR_MESSAGE);
-            e.printStackTrace();
+            errorHandling(e);
         }
     }
 
@@ -108,16 +101,21 @@ public class CoronaCalculator extends JFrame implements ActionListener {
             population = Integer.parseInt(jtPopulation.getText() + "000000");
 
             dataReader = new DataReader(countries);
-            double x = dataReader.getLastInfected();
-            records = dataReader.getRecords();
-            currentDate = dataReader.getLastDate();
 
-            x = calculate(x);
-            calculateDecrease(x);
-            printData();
+            records = dataReader.getRecords();
+
+            if (records.size()>0) {
+                double x = dataReader.getLastInfected();
+                currentDate = dataReader.getLastDate();
+                x = calculate(x);
+                calculateDecrease(x);
+                printData();
+            } else {
+                JOptionPane.showMessageDialog(null,"No data found!","An error occurred!", JOptionPane.ERROR_MESSAGE);
+            }
+
         } catch (Exception e) {
-            JOptionPane.showMessageDialog(null,e.toString(),"An error occurred!", JOptionPane.ERROR_MESSAGE);
-            e.printStackTrace();
+            errorHandling(e);
         }
     }
 
@@ -171,7 +169,6 @@ public class CoronaCalculator extends JFrame implements ActionListener {
             }
             fileWriter.close();
             Runtime.getRuntime().exec("explorer.exe /select," +file);
-
     }
 
     public void actionPerformed (ActionEvent ae){
@@ -188,5 +185,9 @@ public class CoronaCalculator extends JFrame implements ActionListener {
         c.add(Calendar.DATE, days);  // number of days to add
         dt = sdf.format(c.getTime());
         return  dt;
+    }
+    private static void errorHandling (Exception e) {
+        JOptionPane.showMessageDialog(null,e.toString(),"An error occurred!", JOptionPane.ERROR_MESSAGE);
+        e.printStackTrace();
     }
 }
