@@ -1,5 +1,6 @@
 package com.fifzu.coronacalculator;
 
+
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.MergeResult;
 import org.eclipse.jgit.api.PullResult;
@@ -22,19 +23,34 @@ public class DataReader {
     private List<String> records;
     private int lastInfected;
     private String lastDate;
+    private CoronaCalculator coronaCalculator;
 
-   public void cloneRepo() throws Exception {
+
+    public DataReader(CoronaCalculator coronaCalculator) {
+        this.coronaCalculator = coronaCalculator;
+    }
+
+    public void cloneRepo() throws Exception {
        File repoDir = new File("../COVID-19");
 
+       coronaCalculator.writeToTerminal("Checking if Data is present...");
        if (repoDir.exists()) {
            Repository repository = new FileRepository(repoDir.getAbsolutePath() + "/.git");
            Git git = new Git(repository);
 
            PullResult result = git.pull().call();
-           FetchResult fetchResult = result.getFetchResult();
-           MergeResult mergeResult = result.getMergeResult();
-           mergeResult.getMergeStatus();  // this should be interesting
-           System.out.println(mergeResult.toString());
+           MergeResult.MergeStatus mergeStatus = result.getMergeResult().getMergeStatus();
+
+           switch (mergeStatus) {
+               case ALREADY_UP_TO_DATE:
+                   coronaCalculator.writeToTerminal("Data is up to date...");
+                   break;
+               case FAST_FORWARD:
+                   coronaCalculator.writeToTerminal("Data was updated...");
+                   break;
+               default:
+                   throw new Exception("Error while synchronizing Data! Please delete the COVID-19 folder...");
+           }
        } else {
            Git git = Git.cloneRepository()
                    .setURI( "https://github.com/CSSEGISandData/COVID-19.git" )

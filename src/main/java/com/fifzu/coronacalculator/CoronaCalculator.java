@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
@@ -33,16 +34,19 @@ public class CoronaCalculator extends JFrame implements ActionListener {
     static private JCheckBox cbxReadIn = new JCheckBox("Read in Data");
     static private JCheckBox cbcCalculate = new JCheckBox("Calculate Prediction");
     static private JCheckBox cbcPrint = new JCheckBox("Print to csv");
-    static private JTextField txtTerminal = new JTextField("");
-    
-    
+    static private JTextField txtTerminal;
 
     static private JButton jbRun = new JButton("Run");
+    static private List<String> terminalText;
 
 
     public CoronaCalculator() {
 
         super("Corona Calculator");
+        terminalText = new ArrayList<>();
+
+        txtTerminal = new JTextField(20);
+        txtTerminal.setEditable(false);
 
 
         setLayout(new BorderLayout());
@@ -85,21 +89,22 @@ public class CoronaCalculator extends JFrame implements ActionListener {
 
         txtCountries.setText("Austria");
         txtPopulation.setText("8");
+
         txtTerminal.setBackground(Color.BLACK);
         txtTerminal.setForeground(Color.WHITE);
-
 
         jbRun.addActionListener(this);
 
         ParameterPanel.add(jbRun, constraints);
         ParameterPanel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), "Parameters"));
         add(ParameterPanel,BorderLayout.NORTH);
-        add(txtTerminal,BorderLayout.SOUTH);
 
+
+        add(txtTerminal,BorderLayout.SOUTH);
         pack();
         setLocationRelativeTo(null);
 
-        dataReader = new DataReader();
+        dataReader = new DataReader(this);
         try {
             dataReader.cloneRepo();
         } catch (Exception e) {
@@ -128,6 +133,10 @@ public class CoronaCalculator extends JFrame implements ActionListener {
         } catch (Exception e) {
             errorHandling(e);
         }
+    }
+
+    public static void writeToTerminal (String s) {
+        txtTerminal.setText(s);
     }
 
 
