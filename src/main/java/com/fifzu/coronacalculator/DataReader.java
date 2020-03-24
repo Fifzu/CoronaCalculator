@@ -19,24 +19,13 @@ import java.util.Date;
 import java.util.List;
 
 public class DataReader {
-
-    static String REPODIRECTORY = "../COVID-19";
     private List<String> records;
     private int lastInfected;
     private String lastDate;
-    private File repoDir;
 
-    public DataReader(String[] countries) throws Exception {
-        repoDir = new File(REPODIRECTORY);
-        cloneRepo();
-        this.records = calculateRecords(countries);
-        if (records.size()>0){
-            this.lastInfected = calculatelastInfected();
-            this.lastDate = calculatelastDate();
-        }
-    }
+   public void cloneRepo() throws Exception {
+       File repoDir = new File("../COVID-19");
 
-   private void cloneRepo() throws Exception {
        if (repoDir.exists()) {
            Repository repository = new FileRepository(repoDir.getAbsolutePath() + "/.git");
            Git git = new Git(repository);
@@ -65,7 +54,7 @@ public class DataReader {
         return lastDate;
     }
 
-    private List<String> calculateRecords(String[] countries) throws Exception {
+    public List<String> getRecords(String[] countries) throws IOException {
         List<String> readInRecords = new ArrayList<>();
         File[] fileList = new File("../COVID-19/csse_covid_19_data/csse_covid_19_daily_reports").listFiles();
         Arrays.sort(fileList);
@@ -100,10 +89,12 @@ public class DataReader {
                 }
             }
         }
-        return readInRecords;
-    }
+        if (readInRecords.size()>0){
+            this.records = readInRecords;
+            this.lastInfected = calculatelastInfected();
+            this.lastDate = calculatelastDate();
+        }
 
-    public List<String> getRecords() {
         return this.records;
     }
 
@@ -114,4 +105,6 @@ public class DataReader {
     public String getLastDate () {
         return this.lastDate;
     }
+
+
 }

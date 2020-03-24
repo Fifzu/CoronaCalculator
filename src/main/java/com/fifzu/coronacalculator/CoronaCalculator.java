@@ -1,5 +1,6 @@
 package com.fifzu.coronacalculator;
 
+import java.awt.*;
 import java.io.File;
 import java.io.FileWriter;
 import java.text.ParseException;
@@ -7,13 +8,9 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.List;
 
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Insets;
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import org.jfree.data.xy.XYSeries;
 
 import org.jfree.ui.RefineryUtilities;
 
@@ -29,13 +26,16 @@ public class CoronaCalculator extends JFrame implements ActionListener {
     static List<String> records;
     static String currentDate;
 
-    static private JLabel jlCountries = new JLabel("Enter countries (seperated by ;):");
-    static private JLabel jlPopulation = new JLabel("Enter population (in Mio): ");
-    static private JTextField jtCountries = new JTextField(20);
-    static private JTextField jtPopulation = new JTextField(20);
-    static private JCheckBox jbReadin = new JCheckBox("Read in Data");
-    static private JCheckBox jbCalculate = new JCheckBox("Calculate Prediction");
-    static private JCheckBox jbPrint = new JCheckBox("Print to csv");
+    static private JLabel lblCountries = new JLabel("Enter countries (seperated by ;):");
+    static private JLabel lblPopulation = new JLabel("Enter population (in Mio): ");
+    static private JTextField txtCountries = new JTextField(20);
+    static private JTextField txtPopulation = new JTextField(20);
+    static private JCheckBox cbxReadIn = new JCheckBox("Read in Data");
+    static private JCheckBox cbcCalculate = new JCheckBox("Calculate Prediction");
+    static private JCheckBox cbcPrint = new JCheckBox("Print to csv");
+    static private JTextField txtTerminal = new JTextField("");
+    
+    
 
     static private JButton jbRun = new JButton("Run");
 
@@ -44,7 +44,10 @@ public class CoronaCalculator extends JFrame implements ActionListener {
 
         super("Corona Calculator");
 
-        JPanel panel = new JPanel(new GridBagLayout());
+
+        setLayout(new BorderLayout());
+
+        JPanel ParameterPanel = new JPanel(new GridBagLayout());
         GridBagConstraints constraints = new GridBagConstraints();
 
         constraints.anchor = GridBagConstraints.WEST;
@@ -52,44 +55,57 @@ public class CoronaCalculator extends JFrame implements ActionListener {
 
         constraints.gridx = 0;
         constraints.gridy = 0;
-        panel.add(jlCountries, constraints);
+        ParameterPanel.add(lblCountries, constraints);
 
         constraints.gridx = 1;
-        panel.add(jtCountries, constraints);
+        ParameterPanel.add(txtCountries, constraints);
 
         constraints.gridx = 0;
         constraints.gridy = 1;
-        panel.add(jlPopulation, constraints);
+        ParameterPanel.add(lblPopulation, constraints);
 
         constraints.gridx = 1;
-        panel.add(jtPopulation, constraints);
+        ParameterPanel.add(txtPopulation, constraints);
 
         constraints.gridx = 0;
         constraints.gridy = 3;
-        panel.add(jbReadin, constraints);
+        ParameterPanel.add(cbxReadIn, constraints);
 
         constraints.gridx = 1;
-        panel.add(jbCalculate, constraints);
+        ParameterPanel.add(cbcCalculate, constraints);
 
         constraints.gridx = 0;
         constraints.gridy = 4;
-        panel.add(jbPrint, constraints);
+        ParameterPanel.add(cbcPrint, constraints);
 
         constraints.gridx = 0;
         constraints.gridy = 5;
         constraints.gridwidth = 2;
         constraints.anchor = GridBagConstraints.CENTER;
 
-        jtCountries.setText("Austria");
-        jtPopulation.setText("8");
+        txtCountries.setText("Austria");
+        txtPopulation.setText("8");
+        txtTerminal.setBackground(Color.BLACK);
+        txtTerminal.setForeground(Color.WHITE);
+
+
         jbRun.addActionListener(this);
 
-        panel.add(jbRun, constraints);
-        panel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), "Parameters"));
-        add(panel);
+        ParameterPanel.add(jbRun, constraints);
+        ParameterPanel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), "Parameters"));
+        add(ParameterPanel,BorderLayout.NORTH);
+        add(txtTerminal,BorderLayout.SOUTH);
 
         pack();
         setLocationRelativeTo(null);
+
+        dataReader = new DataReader();
+        try {
+            dataReader.cloneRepo();
+        } catch (Exception e) {
+            errorHandling(e);
+        }
+
     }
 
     public static void main(String[] args) {
@@ -108,9 +124,7 @@ public class CoronaCalculator extends JFrame implements ActionListener {
 
     private static void loadData() {
         try {
-            countries = jtCountries.getText().split(";");
-            dataReader = new DataReader(countries);
-            records = dataReader.getRecords();
+            records = dataReader.getRecords(countries);
         } catch (Exception e) {
             errorHandling(e);
         }
@@ -189,17 +203,17 @@ public class CoronaCalculator extends JFrame implements ActionListener {
     public void actionPerformed (ActionEvent ae){
         try {
             days = 0;
-            countries = jtCountries.getText().split(";");
-            population = Integer.parseInt(jtPopulation.getText() + "000000");
+            countries = txtCountries.getText().split(";");
+            population = Integer.parseInt(txtPopulation.getText() + "000000");
 
             if(ae.getSource() == this.jbRun){
-                if (jbReadin.isSelected()) {
+                if (cbxReadIn.isSelected()) {
                     loadData();
                 }
-                if (jbCalculate.isSelected()) {
+                if (cbcCalculate.isSelected()) {
                     startCalculation();
                 }
-                if (jbPrint.isSelected()) {
+                if (cbcPrint.isSelected()) {
                     printData();
                 }
                 showPraph();

@@ -69,5 +69,7 @@ public class DataGraph extends ApplicationFrame {
         dataset.addSeries(predictions);
         return dataset;
     }
+
+
 }
 
