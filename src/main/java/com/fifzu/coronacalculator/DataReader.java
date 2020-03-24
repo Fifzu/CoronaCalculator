@@ -80,7 +80,7 @@ public class DataReader {
                     while (true) {
                         if (!((line = br.readLine()) != null)) {
                             if (infected > 0 || deaths > 0) {
-                                readInRecords.add(file.getName().replaceFirst("[.][^.]+$", "") + ";" + infected + ";" + deaths);
+                                readInRecords.add(file.getName().replaceFirst("[.][^.]+$", "") + ";" + infected + ";" + deaths+";false");
                             }
                             break;
                         }

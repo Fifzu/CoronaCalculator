@@ -2,6 +2,7 @@ package com.fifzu.coronacalculator;
 
 import java.io.File;
 import java.io.FileWriter;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.List;
@@ -9,17 +10,12 @@ import java.util.List;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
-import javax.swing.BorderFactory;
-import javax.swing.JButton;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JTextField;
-import javax.swing.SwingUtilities;
-import javax.swing.UIManager;
-import javax.swing.JOptionPane;
+import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import org.jfree.data.xy.XYSeries;
+
+import org.jfree.ui.RefineryUtilities;
 
 public class CoronaCalculator extends JFrame implements ActionListener {
 
@@ -37,13 +33,18 @@ public class CoronaCalculator extends JFrame implements ActionListener {
     static private JLabel jlPopulation = new JLabel("Enter population (in Mio): ");
     static private JTextField jtCountries = new JTextField(20);
     static private JTextField jtPopulation = new JTextField(20);
+    static private JCheckBox jbReadin = new JCheckBox("Read in Data");
+    static private JCheckBox jbCalculate = new JCheckBox("Calculate Prediction");
+    static private JCheckBox jbPrint = new JCheckBox("Print to csv");
+
     static private JButton jbRun = new JButton("Run");
+
 
     public CoronaCalculator() {
 
         super("Corona Calculator");
 
-        JPanel newPanel = new JPanel(new GridBagLayout());
+        JPanel panel = new JPanel(new GridBagLayout());
         GridBagConstraints constraints = new GridBagConstraints();
 
         constraints.anchor = GridBagConstraints.WEST;
@@ -51,20 +52,31 @@ public class CoronaCalculator extends JFrame implements ActionListener {
 
         constraints.gridx = 0;
         constraints.gridy = 0;
-        newPanel.add(jlCountries, constraints);
+        panel.add(jlCountries, constraints);
 
         constraints.gridx = 1;
-        newPanel.add(jtCountries, constraints);
+        panel.add(jtCountries, constraints);
 
         constraints.gridx = 0;
         constraints.gridy = 1;
-        newPanel.add(jlPopulation, constraints);
+        panel.add(jlPopulation, constraints);
 
         constraints.gridx = 1;
-        newPanel.add(jtPopulation, constraints);
+        panel.add(jtPopulation, constraints);
 
         constraints.gridx = 0;
-        constraints.gridy = 2;
+        constraints.gridy = 3;
+        panel.add(jbReadin, constraints);
+
+        constraints.gridx = 1;
+        panel.add(jbCalculate, constraints);
+
+        constraints.gridx = 0;
+        constraints.gridy = 4;
+        panel.add(jbPrint, constraints);
+
+        constraints.gridx = 0;
+        constraints.gridy = 5;
         constraints.gridwidth = 2;
         constraints.anchor = GridBagConstraints.CENTER;
 
@@ -72,9 +84,9 @@ public class CoronaCalculator extends JFrame implements ActionListener {
         jtPopulation.setText("8");
         jbRun.addActionListener(this);
 
-        newPanel.add(jbRun, constraints);
-        newPanel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), "Parameters"));
-        add(newPanel);
+        panel.add(jbRun, constraints);
+        panel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), "Parameters"));
+        add(panel);
 
         pack();
         setLocationRelativeTo(null);
@@ -94,22 +106,25 @@ public class CoronaCalculator extends JFrame implements ActionListener {
         }
     }
 
+    private static void loadData() {
+        try {
+            countries = jtCountries.getText().split(";");
+            dataReader = new DataReader(countries);
+            records = dataReader.getRecords();
+        } catch (Exception e) {
+            errorHandling(e);
+        }
+    }
+
+
     private static void startCalculation() {
         try {
-            days = 0;
-            countries = jtCountries.getText().split(";");
-            population = Integer.parseInt(jtPopulation.getText() + "000000");
-
-            dataReader = new DataReader(countries);
-
-            records = dataReader.getRecords();
-
             if (records.size()>0) {
                 double x = dataReader.getLastInfected();
                 currentDate = dataReader.getLastDate();
                 x = calculate(x);
                 calculateDecrease(x);
-                printData();
+
             } else {
                 JOptionPane.showMessageDialog(null,"No data found!","An error occurred!", JOptionPane.ERROR_MESSAGE);
             }
@@ -129,7 +144,7 @@ public class CoronaCalculator extends JFrame implements ActionListener {
             String dt  = getDate();
 
             System.out.println("In " + days + " Tagen sind " + (int) x + " Personen infiziert (" + (int) percent + "%). "+ (int) deaths + " sind tot.");
-            records.add(dt+ ";"+(int) x + ";"+ (int) deaths);
+            records.add(dt+ ";"+(int) x + ";"+ (int) deaths+";true");
 
             return calculate(x);
         } else {
@@ -147,7 +162,7 @@ public class CoronaCalculator extends JFrame implements ActionListener {
             String dt  = getDate();
 
             System.out.println("In " + days + " Tagen sind " + (int) x + " Personen infiziert (" + (int) percent + "%). " + (int) deaths + " sind tot.");
-            records.add(dt+ ";"+(int) x + ";"+ (int) deaths);
+            records.add(dt+ ";"+(int) x + ";"+ (int) deaths+";true");
 
             return calculateDecrease(x);
         } else {
@@ -172,9 +187,26 @@ public class CoronaCalculator extends JFrame implements ActionListener {
     }
 
     public void actionPerformed (ActionEvent ae){
-        if(ae.getSource() == this.jbRun){
-            startCalculation();
-    //        JOptionPane.showMessageDialog(null,"Finished Calculation","Corona Calculator", JOptionPane.INFORMATION_MESSAGE);
+        try {
+            days = 0;
+            countries = jtCountries.getText().split(";");
+            population = Integer.parseInt(jtPopulation.getText() + "000000");
+
+            if(ae.getSource() == this.jbRun){
+                if (jbReadin.isSelected()) {
+                    loadData();
+                }
+                if (jbCalculate.isSelected()) {
+                    startCalculation();
+                }
+                if (jbPrint.isSelected()) {
+                    printData();
+                }
+                showPraph();
+            }
+            //        JOptionPane.showMessageDialog(null,"Finished Calculation","Corona Calculator", JOptionPane.INFORMATION_MESSAGE);
+        } catch (Exception e) {
+            errorHandling(e);
         }
     }
 
@@ -185,6 +217,13 @@ public class CoronaCalculator extends JFrame implements ActionListener {
         c.add(Calendar.DATE, days);  // number of days to add
         dt = sdf.format(c.getTime());
         return  dt;
+    }
+
+    private void showPraph() throws ParseException {
+        DataGraph graph = new DataGraph(countries[0], records);
+        graph.pack();
+        RefineryUtilities.centerFrameOnScreen(graph);
+        graph.setVisible(true);
     }
     private static void errorHandling (Exception e) {
         JOptionPane.showMessageDialog(null,e.toString(),"An error occurred!", JOptionPane.ERROR_MESSAGE);
